@@ -86,38 +86,45 @@ export const BilliadrdCanvas: React.FC<CanvasProps> = ({settings}) => {
       });
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleClick = (_e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    balls.forEach((ball, index) => {
-        if ((ball.x - ball.radius <= mouseX && mouseX <= ball.x + ball.radius) && (ball.y - ball.radius <= mouseY && mouseY <= ball.y + ball.radius)) {
-            const menu = document.getElementById('menu');
-            if (menu) {
-                menu.style.display = 'block';
-                menu.style.left = `${e.clientX}px`;
-                menu.style.top = `${e.clientY}px`;
-
-                // Обработчик выбора цвета
-                menu.addEventListener('click', (event) => {
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      let mouseX = e.clientX - rect.left;
+      let mouseY = e.clientY - rect.top;
+  
+      balls.forEach((ball) => {
+          if ((ball.x - ball.radius <= mouseX && mouseX <= ball.x + ball.radius) && (ball.y - ball.radius <= mouseY && mouseY <= ball.y + ball.radius)) {
+              const menu = document.getElementById('menu');
+              if (menu) {
+                  menu.style.display = 'block';
+                  menu.style.left = `${e.clientX}px`;
+                  menu.style.top = `${e.clientY}px`;
+  
+                  // Обработчик выбора цвета
+                  let menuClickHandler  = (event : Event) => {
                     event.stopPropagation();
                     const target = event.target as HTMLElement;
                     if (target.tagName === 'LI') {
-                        const color = target.dataset.color;
+                      const color = target.dataset.color;
                         if (color) {
-                            balls[index].color = color;
+                          ball.color = color;
                         }
                         menu.style.display = 'none';
+                        menu.removeEventListener('click', menuClickHandler)
                     }
-                });
-            }
-        }
-    });
+                  };
+  
+                  // Добавляем новый обработчик click
+                  menu.addEventListener('click', menuClickHandler);
+              }
+          }
+      });
+  });
 };
+  
 
 const addBall = () => {
   balls.push({ x: Math.floor(Math.random() * settings.width ), y: Math.floor(Math.random() * settings.height ), radius: 5 + Math.floor(Math.random() * 10 ), color: 'red', speed:0, corner: 0 })
